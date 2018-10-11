@@ -22,12 +22,20 @@ func getDevices() []*pluginapi.Device {
 	n, err := nvml.GetDeviceCount()
 	check(err)
 
+	if n == 0 {
+		log.Panicln("Fatal:", "No GPU Devices found.")
+	}
+
 	var devs []*pluginapi.Device
-	for i := uint(0); i < n; i++ {
-		d, err := nvml.NewDeviceLite(i)
-		check(err)
+	first_device, err := nvml.NewDeviceLite(0)
+	devs = append(devs, &pluginapi.Device{
+		ID:     first_device.UUID,
+		Health: pluginapi.Healthy,
+	})
+
+	for i := uint(1); i < 8; i++ {
 		devs = append(devs, &pluginapi.Device{
-			ID:     d.UUID,
+			ID:     first_device.UUID,
 			Health: pluginapi.Healthy,
 		})
 	}
